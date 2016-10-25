@@ -7,3 +7,10 @@ td, th {
   padding: 10px;
 }
 
+th {
+  cursor: pointer;
+}
+
+input {
+  border-radius:3px;
+}

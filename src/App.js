@@ -16,7 +16,8 @@ class App extends Component {
       tableData: data,
       sortCol: "ItemName",
       sortDirection: "asc",
-      sortArrows: {}
+      sortArrows: {},
+      filterText: ""
    }
   }
 
@@ -48,16 +49,23 @@ class App extends Component {
 
   }
 
-  render() {
+  handleType (e) {
+    var inputTextNew = e.target.value;
 
-    var tableHeaders = Object.keys(this.state.tableData[0]).map( (item, index) => {
-      return <th key={index} onClick={this.handleClickHeader.bind(this,item)}>{item}<span>{this.state.sortArrows[item]}</span></th>
-    })
+    this.setState({
+      filterText: inputTextNew
+    });
 
-    var sortedData = this.state.tableData.sort( (a,b) => {
+  }
 
+  sortAndFilterData () {
+
+    var data = this.state.tableData.filter( (row) => {
+      return JSON.stringify(row).toLowerCase().match(this.state.filterText.toLowerCase());
+    });
+
+    data.sort( (a,b) => {
       if (a[this.state.sortCol]) {
-
         if ( !isNaN(parseFloat(a[this.state.sortCol])) && !a[this.state.sortCol].match(/-/gi) ) {
           console.log('number sort');
           if (this.state.sortDirection === "asc") return parseFloat(a[this.state.sortCol]) - parseFloat(b[this.state.sortCol]);
@@ -75,12 +83,19 @@ class App extends Component {
             if (a[this.state.sortCol] < b[this.state.sortCol]) return 1;
           }
         }
-
       }
-
     });
 
-    var tableData = sortedData.map( (datum, index) => {
+    return data;
+  }
+
+  render() {
+
+    var tableHeaders = Object.keys(this.state.tableData[0]).map( (item, index) => {
+      return <th key={index} onClick={this.handleClickHeader.bind(this,item)}>{item}<span>{this.state.sortArrows[item]}</span></th>
+    })
+
+    var tableData = this.sortAndFilterData().map( (datum, index) => {
       var row = [];
       for (var key in datum) {
         row.push(<td key={key}>{datum[key]}</td>)
@@ -91,6 +106,13 @@ class App extends Component {
     return (
       <div>
         <h1>Sort Table</h1>
+
+        <input 
+          type="text" 
+          onKeyUp={this.handleType.bind(this)}
+        />
+        
+        <div style={{height:"35px"}}></div>
 
         <table>
           <thead>
